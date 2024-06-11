@@ -11,6 +11,7 @@
             @input="onIsShowOriginChange"
           >
           </el-switch>
+          <el-button type="primary" @click="exportData">导出数据</el-button>
         </div>
       </template>
 
@@ -38,9 +39,11 @@ import 'element-plus/theme-chalk/src/message.scss'
 
 import EmptyIndex from '@/management/components/EmptyIndex.vue'
 import LeftMenu from '@/management/components/LeftMenu.vue'
-import { getRecycleList } from '@/management/api/analysis'
+import { getRecycleList,downloadSurvey } from '@/management/api/analysis'
 
 import DataTable from './components/DataTable.vue'
+import { el } from 'element-plus/es/locales.mjs'
+
 
 export default {
   name: 'AnalysisPage',
@@ -117,7 +120,7 @@ export default {
 
       return head
     },
-    async onIsShowOriginChange(data) {
+    async  onIsShowOriginChange(data) {
       if (this.mainTableLoading) {
         return
       }
@@ -125,6 +128,22 @@ export default {
       this.tmpIsShowOriginData = data
       await this.init()
       this.isShowOriginData = data
+    },
+
+    async exportData() {
+      try {
+        const res = await downloadSurvey({
+          surveyId:  String(this.$route.params.id),
+          isDesensitive: true
+        })
+        console.log(this.$route.params.id)
+        if (res.code === 200) {
+          ElMessage.success('下载成功')
+        }
+      } catch (error) {
+        ElMessage.error('下载失败')
+        ElMessage.error(error.message)
+      }
     }
   },
 
@@ -133,6 +152,7 @@ export default {
     EmptyIndex,
     LeftMenu
   }
+
 }
 </script>
 
@@ -158,6 +178,8 @@ export default {
 
 .menus {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .content-wrapper {
